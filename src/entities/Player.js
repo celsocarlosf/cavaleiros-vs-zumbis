@@ -12,7 +12,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Configura o corpo físico
     this.body.setSize(14, 19);
     this.body.setOffset(9, 9);
-    this.body.setGravityY(600);
+    this.body.setGravityY(800);
     this.setCollideWorldBounds(true);
 
     // Controles
@@ -33,6 +33,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.hud = null;
 
     // Animação inicial
+    this.particles = scene.add.particles(0, 0, 'whitePixel', {
+      scale: { start: 1.5, end: 0.5, random: true },
+      alpha: { start: 1, end: 0 },
+      speedY: { min: -1, max: -12 },
+      lifespan: { min: 100, max: 1000, ease: 'bounce.in' },                   // duração da partícula (0.5 segundos)
+      frequency: 40,          // intervalo entre emissões
+      quantity: 5,
+      bounce: 5,
+    }).setDepth(20);
+
+    // Para as partículas inicialmente
+    this.particles.stop();
+
     this.play('parado');
   }
 
@@ -57,20 +70,37 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     const speed = 100;
-    const jumpForce = -250;
+    const jumpForce = -300;
+    let isRunning = false;
 
     // Movimento horizontal
     if (this.cursors.left.isDown) {
       this.setVelocityX(-speed);
       this.flipX = true;
       this.anims.play('andar', true);
+      isRunning = true;
     } else if (this.cursors.right.isDown) {
       this.setVelocityX(speed);
       this.flipX = false;
       this.anims.play('andar', true);
+      isRunning = true;
     } else {
       this.setVelocityX(0);
       this.anims.play('parado', true);
+      isRunning = false;
+    }
+
+    // Controla o emitter baseado no movimento
+    if (isRunning && this.body.blocked.down) {
+      // Posiciona o emitter nos pés do player
+      // this.particles.setPosition(this.x, this.y + 10);
+      // set oposit speed for more natural effect
+      // this.particles.setAngle(this.flipX ? 0 : 180);
+
+      this.particles.startFollow(this, 0, 10);
+      this.particles.start();
+    } else {
+      this.particles.stop();
     }
 
     // Pular
@@ -82,7 +112,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   takeDamage(damage = 1, pushDirection = 0) {
     // Se está invulnerável, não toma dano
     if (this.isInvulnerable) return;
-    
+
     this.health -= damage;
     console.log(`Player health: ${this.health}/${this.maxHealth}`);
 
@@ -90,16 +120,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.hud) {
       this.hud.updateHealth(this.health, this.maxHealth);
     }
-    
+
     // Ativa invencibilidade temporária
     this.isInvulnerable = true;
-    
+
     // Aplica o knockback apenas se não vai morrer
     if (this.health > 0 && pushDirection !== 0) {
       this.setVelocityX(pushDirection * 150);
       this.setVelocityY(-100); // Pequeno pulo de knockback
     }
-    
+
     // Efeito visual de piscar
     this.scene.tweens.add({
       targets: this,
@@ -112,13 +142,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.isInvulnerable = false;
       }
     });
-    
+
     // Efeito visual de dano (tint vermelho)
     this.setTint(0xff0000);
     this.scene.time.delayedCall(200, () => {
       this.clearTint();
     });
-    
+
     // Verifica se morreu
     if (this.health <= 0) {
       this.die();
@@ -136,20 +166,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   die() {
     console.log("Game Over!");
-    
+
     // Para o movimento do player IMEDIATAMENTE
     this.setVelocity(0, 0);
     this.body.setVelocity(0, 0); // Garante que pare mesmo
-    
+
     // Remove controles para evitar movimento durante a morte
     this.cursors = null;
-    
+
     // Toca a animação de morte
     this.play('player_died');
-    
+
     // Opcional: adiciona um efeito sonoro de morte aqui
     // this.scene.sound.play('death_sound');
-    
+
     // Aguarda a animação terminar antes de fazer mais ações
     this.on('animationcomplete-player_died', () => {
       // Escurece o player gradualmente

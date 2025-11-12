@@ -1,14 +1,20 @@
 import Phaser from "phaser";
 
 export default class GameScene extends Phaser.Scene {
+
   constructor() {
     super("GameScene");
   }
 
 
   preload() {
-    // Carrega o spritesheet do personagem (6 frames de 32x32 pixels)
-    this.load.spritesheet('personagem', '/assets/knight/sprites/knight.png', {
+    // Carrega o spritesheet do knight (6 frames de 32x32 pixels)
+    this.load.spritesheet('knight', '/assets/knight/sprites/knight.png', {
+      frameWidth: 32,
+      frameHeight: 32
+    });
+
+    this.load.spritesheet('sword', '/assets/knight/sprites/excalibur.png', {
       frameWidth: 32,
       frameHeight: 32
     });
@@ -17,6 +23,9 @@ export default class GameScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     });
+
+
+
 
   }
 
@@ -36,20 +45,54 @@ export default class GameScene extends Phaser.Scene {
     // Cria animação
     this.anims.create({
       key: 'parado',
-      frames: this.anims.generateFrameNumbers('personagem', { start: 0, end: 3 }),
+      frames: this.anims.generateFrameNumbers('knight', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1
     });
 
     this.anims.create({
       key: 'andar',
-      frames: this.anims.generateFrameNumbers('personagem', { start: 16, end: 23 }),
+      frames: this.anims.generateFrameNumbers('knight', { start: 16, end: 23 }),
       frameRate: 10,
       repeat: -1
     });
 
+    this.anims.create({
+      key: 'sword_swing',
+      frames: this.anims.generateFrameNumbers('sword', { start: 4, end: 7 }),
+      frameRate: 15,
+      repeat: 0,
+    });
+
     // Adiciona sprite à tela
-    this.player = this.physics.add.sprite(200, 16 * 19 - 12, 'player');
+    this.player = this.physics.add.sprite(200, 200);
+    this.player.setDepth(10);
+    //this.player.setGravityY(800);
+    this.sword = this.add.sprite(200, 210, 'sword');
+    this.sword.setDepth(0)
+    // this.sword.setPipeline('Light2D'); // opcional, se estiver usando luzes
+    // this.sword.setAntialias(false);
+
+    // rotate 30 degrees
+    // this.sword.rotation = Phaser.Math.DegToRad(30);
+    this.sword.setAngle(30)
+
+    console.log("Largura da espada:", this.sword.width);
+    console.log("Altura da espada:", this.sword.height);
+
+    // this.swordDebug = this.add.graphics();
+    // this.swordDebug.lineStyle(1, 0xff0000); // linha vermelha de 2px
+    // this.swordDebug.strokeRect(
+    //   this.sword.x - this.sword.width / 2,
+    //   this.sword.y - this.sword.height / 2,
+    //   this.sword.width,
+    //   this.sword.height
+    // );
+
+    this.sword.setOrigin(0.5, 1);
+
+
+
 
     this.cameras.main.startFollow(this.player);
 
@@ -72,5 +115,23 @@ export default class GameScene extends Phaser.Scene {
     } else {
       this.player.play('parado', true);
     }
+
+    // if press space, play sword animation once 
+    if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+      this.tweens.add({
+        targets: this.sword,
+        angle: 90,
+        duration: 100,
+        yoyo: true,       // volta pro ângulo original automaticamente
+        ease: 'Sine.InOut',
+        repeat: 0
+      });
+
+      this.sword.play('sword_swing', true);
+
+
+    }
+
+
   }
 }

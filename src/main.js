@@ -18,10 +18,10 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 0 }, // será substituída na cena
-      // debug: true,       // mostra o contorno dos objetos
+      //debug: true,       // mostra o contorno dos objetos
     },
   },
-  scene: [Fase1, GameScene],
+  scene: [GameScene, Fase1],
   scale: {
     mode: Phaser.Scale.FIT,     // Ajusta o canvas para caber na tela do navegador
     autoCenter: Phaser.Scale.CENTER_BOTH

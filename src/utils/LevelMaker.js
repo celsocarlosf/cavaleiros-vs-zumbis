@@ -11,11 +11,11 @@ export default function levelMaker(scene, mapData, tilesetKey, player) {
   };
 
   const layersData = [
-    {
-      name: "background",
-      collision: false,
-      order: 1
-    },
+    // {
+    //   name: "background",
+    //   collision: false,
+    //   order: 1
+    // },
     {
       name: "ground",
       collision: true,

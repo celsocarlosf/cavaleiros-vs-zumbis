@@ -12,6 +12,15 @@ export default class Fase1 extends Phaser.Scene {
   }
 
   preload() {
+
+    // Cria uma textura branca 2x2 diretamente (não precisa carregar imagem)
+    const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+    graphics.fillStyle(0xffffff, 1);
+    graphics.fillRect(0, 0, 2, 2);
+    graphics.generateTexture('whitePixel', 2, 2);
+
+
+
     this.load.spritesheet('player', '/assets/knight/sprites/knight.png', {
       frameWidth: 32,
       frameHeight: 32
@@ -69,6 +78,31 @@ export default class Fase1 extends Phaser.Scene {
       frameRate: 10,
       repeat: -1
     });
+
+    // const emitter = this.add.particles('whitePixel', {
+    //   x: { min: 0, max: 100 }, // espalha na largura
+    //   y: { min: 0, max: 100 },               // começa na base da tela
+    //   quantity: 100,
+    //   // depth: -1,                    // quantas partículas por emissão
+    // });
+
+
+
+    // emitter.start();
+    // Cria o emissor
+    // const emitter = particles.createEmitter({
+    //   x: { min: 0, max: this.scale.width }, // espalha na largura
+    //   y: this.scale.height,                // começa na base da tela
+    //   quantity: 2,                         // quantas partículas por emissão
+    //   frequency: 150,                      // intervalo entre emissões (ms)
+    //   lifespan: 2000,                      // quanto tempo a partícula dura (ms)
+    //   speedY: { min: -30, max: -60 },      // sobe lentamente
+    //   scale: { start: 1, end: 0 },         // encolhe até sumir
+    //   alpha: { start: 0.8, end: 0 },       // desaparece gradualmente
+    //   gravityY: 0,                         // sem gravidade
+    //   blendMode: 'ADD',                    // brilho leve (pode trocar pra 'NORMAL')
+    // });
+
 
 
     this.ajustaWorld(mapData);
