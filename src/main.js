@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import GameScene from "./scenes/GameScene.js";
+import Test1 from "./scenes/Test1.js";
+import Test2 from "./scenes/Test2.js";
 import Fase1 from "./scenes/Fase1.js";
 
 const TILE_SIZE = 16;
@@ -17,13 +18,13 @@ const config = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { y: 0 }, // será substituída na cena
-      //debug: true,       // mostra o contorno dos objetos
+      // gravity: { y: 0 }, 
+      //debug: true,      
     },
   },
-  scene: [GameScene, Fase1],
+  scene: [Fase1, Test2, Test1 ],
   scale: {
-    mode: Phaser.Scale.FIT,     // Ajusta o canvas para caber na tela do navegador
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
 };

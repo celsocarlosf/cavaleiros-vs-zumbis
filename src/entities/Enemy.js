@@ -75,13 +75,34 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.isDead = true;
     this.setVelocity(0, 0);
 
-    // TODO: Adicionar animação de morte
-    this.setAlpha(0.5);
-
-    // Remove o inimigo após um tempo
-    this.scene.time.delayedCall(1000, () => {
-      this.destroy();
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: 0,
+      scaleY: 0,
+      duration: 500,
+      ease: 'Power2',
+      onComplete: () => {
+        this.destroy();
+      }
     });
+
+    this.particles = this.scene.add.particles(this.x, this.y + 8, 'whitePixel', {
+      lifespan: 1000,
+      speed: { min: 15, max: 25 },
+      scale: { start: 4, end: 0 },
+      gravityY: -5,
+      emitting: false
+    }).setDepth(20);
+    this.particles.explode(12)
+
+    // // TODO: Adicionar animação de morte
+    // this.setAlpha(0.5);
+
+    // // Remove o inimigo após um tempo
+    // this.scene.time.delayedCall(1000, () => {
+    //   this.destroy();
+    // });
+
   }
 
   attack(player) {
@@ -105,15 +126,15 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     const pushDirection = player.x < this.x ? -1 : 1;
 
     // Verifica se o player está caindo em cima do inimigo (como no Mario)
-    const playerBottom = player.y + player.body.height/2;
-    const enemyTop = this.y - this.body.height/2;
-    
+    const playerBottom = player.y + player.body.height / 2;
+    const enemyTop = this.y - this.body.height / 2;
+
     // Player deve estar caindo (velocidade Y positiva) e acima do inimigo
     if (player.body.velocity.y > 50 && playerBottom < this.y && player.y < enemyTop + 10) {
       // Player mata o inimigo pulando em cima
       player.setVelocityY(-200); // Pequeno pulo de satisfação
       this.takeDamage(3); // Mata de uma vez
-      
+
     } else {
       // Inimigo ataca o player (colisão lateral ou por baixo)
       this.attack(player);

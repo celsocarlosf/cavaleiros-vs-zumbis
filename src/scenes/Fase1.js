@@ -20,7 +20,6 @@ export default class Fase1 extends Phaser.Scene {
     graphics.generateTexture('whitePixel', 2, 2);
 
 
-
     this.load.spritesheet('player', '/assets/knight/sprites/knight.png', {
       frameWidth: 32,
       frameHeight: 32
