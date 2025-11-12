@@ -58,10 +58,30 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'sword_swing',
-      frames: this.anims.generateFrameNumbers('sword', { start: 4, end: 7 }),
+      key: 'sword',
+      frames: this.anims.generateFrameNumbers('sword', { start: 0, end: 0 }),
       frameRate: 15,
       repeat: 0,
+    });
+
+    this.anims.create({
+      key: 'sword_swing',
+      frames: [
+        { key: "sword", frame: 6 },
+        { key: "sword", frame: 5 },
+        { key: "sword", frame: 5 },
+        { key: "sword", frame: 5 },
+        { key: "sword", frame: 6 },
+        // volta
+        { key: "sword", frame: 10 },
+        { key: "sword", frame: 9 },
+        { key: "sword", frame: 9 },
+        { key: "sword", frame: 9 },
+        { key: "sword", frame: 10 }
+      ],
+      frameRate: 100  ,
+      repeat: 0,
+      // yoyo: true
     });
 
     // Adiciona sprite à tela
@@ -69,6 +89,7 @@ export default class GameScene extends Phaser.Scene {
     this.player.setDepth(10);
     //this.player.setGravityY(800);
     this.sword = this.add.sprite(200, 210, 'sword');
+    this.sword.play('sword');
     this.sword.setDepth(0)
     // this.sword.setPipeline('Light2D'); // opcional, se estiver usando luzes
     // this.sword.setAntialias(false);
@@ -121,13 +142,19 @@ export default class GameScene extends Phaser.Scene {
       this.tweens.add({
         targets: this.sword,
         angle: 90,
-        duration: 100,
+        duration: 50,
         yoyo: true,       // volta pro ângulo original automaticamente
-        ease: 'Sine.InOut',
+        // ease: 'Sine.InOut',
         repeat: 0
       });
 
       this.sword.play('sword_swing', true);
+
+      this.sword.on('animationcomplete', () => {
+        // remove play sword_swing animation
+        //this.sword.play('sword_swing', true);
+        this.sword.play('sword');
+      });
 
 
     }
