@@ -1,7 +1,10 @@
 import Phaser from "phaser";
 import Test1 from "./scenes/Test1.js";
 import Test2 from "./scenes/Test2.js";
+import Test3 from "./scenes/Test3.js";
 import Fase1 from "./scenes/Fase1.js";
+import BootScene from "./scenes/BootScene.js";
+import Level1 from "./scenes/Level1.js";
 
 const TILE_SIZE = 16;
 
@@ -22,7 +25,7 @@ const config = {
       //debug: true,      
     },
   },
-  scene: [Fase1, Test2, Test1 ],
+  scene: [BootScene, Level1],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH

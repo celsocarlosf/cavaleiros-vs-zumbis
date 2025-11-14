@@ -7,6 +7,9 @@ export default class Test2 extends Phaser.Scene {
   }
 
   preload() {
+
+    this.load.image('simple_sword', 'assets/knight/sprites/simple_sword.png');
+
     // Carrega o spritesheet do knight (6 frames de 32x32 pixels)
     this.load.spritesheet('knight', '/assets/knight/sprites/knight.png', {
       frameWidth: 32,
@@ -38,6 +41,14 @@ export default class Test2 extends Phaser.Scene {
 
     // Adiciona sprite à tela
     this.player = this.physics.add.sprite(200, 200);
+    this.player.setDepth(10);
+
+
+    this.sword = this.add.sprite(this.player.x + 2, this.player.y + 8, 'simple_sword');
+    this.sword.setOrigin(0.1, 1);
+    this.sword.setScale(1);
+
+    // this.tweens.add({ 
 
     this.enemy = this.physics.add.sprite(300, 200);
 
@@ -68,28 +79,64 @@ export default class Test2 extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
 
-      console.log("Criando partículas de explosao...");
+      this.sword.setPosition(this.player.x + 2, this.player.y + 8);
 
-      // make enemy shirnk
       this.tweens.add({
-        targets: this.enemy,
-        scaleX: 0,
-        scaleY: 0,
-        duration: 500,
-        ease: 'Power2',
+        targets: this.sword,
+        angle: -60,       // vai pra trás
+        duration: 10,
+        // ease: 'Sine.easeOut',
         onComplete: () => {
-          this.enemy.destroy();
+          // Etapa 2: desce pra frente (golpe)
+          this.tweens.add({
+            targets: this.sword,
+            angle: 60,     // golpe pra frente
+            duration: 120,
+            // ease: 'Cubic.easeIn',
+            // yoyo: true,    // volta à posição inicial automaticamente
+            onComplete: () => {
+              this.tweens.add({
+                targets: this.sword,
+                angle: 0,   // volta à posição inicial
+                duration: 20,
+                // ease: 'Sine.easeInOut'
+              });
+            }
+          });
         }
       });
 
-      this.particles = this.add.particles(this.enemy.x, this.enemy.y + 8, 'whiteCircle', {
-        lifespan: 1000,
-        speed: { min: 15, max: 25 },
-        scale: { start: 2, end: 0 },
-        gravityY: -5,
-        emitting: false
-      }).setDepth(20);
-      this.particles.explode(8)
+      // this.tweens.add({
+      //   targets: this.sword,
+      //   angle: 360,
+      //   duration: 1000,
+      //   //yoyo: true,       
+      //   // ease: 'Sine.InOut',
+      //   repeat: -1
+      // });
+
+
+      // console.log("Criando partículas de explosao...");
+      // // make enemy shirnk
+      // this.tweens.add({
+      //   targets: this.enemy,
+      //   scaleX: 0,
+      //   scaleY: 0,
+      //   duration: 500,
+      //   ease: 'Power2',
+      //   onComplete: () => {
+      //     this.enemy.destroy();
+      //   }
+      // });
+
+      // this.particles = this.add.particles(this.enemy.x, this.enemy.y + 8, 'whiteCircle', {
+      //   lifespan: 1000,
+      //   speed: { min: 15, max: 25 },
+      //   scale: { start: 2, end: 0 },
+      //   gravityY: -5,
+      //   emitting: false
+      // }).setDepth(20);
+      // this.particles.explode(8)
     }
   }
 
@@ -104,7 +151,7 @@ export default class Test2 extends Phaser.Scene {
 
     this.anims.create({
       key: 'andar',
-      frames: this.anims.generateFrameNumbers('knight', { start: 16, end: 23 }),
+      frames: this.anims.generateFrameNumbers('knight', { start: 4, end: 23 }),
       frameRate: 10,
       repeat: -1
     });
