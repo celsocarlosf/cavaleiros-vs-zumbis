@@ -76,8 +76,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     const xOffset = -5;
     const yOffset = -2;
 
-    //this.sword.setScale(1.0);
-
     if (this.facing === 'right') {
       this.sword.setPosition(this.x + xOffset, this.y + yOffset);
       this.sword.setAngle(0);
@@ -86,37 +84,32 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.sword.setAngle(360);
     }
 
-    // wait 200 ms to simulate attack duration
+    // fazer ataque
     this.scene.time.delayedCall(100, () => {
-      // 
-      if (this.facing === 'right') {
-        this.sword.setAngle(90);
-        this.sword.setPosition(this.x + 8, this.y + 8);
-        // add a small jump to the player
-        this.setVelocityY(-50);
-        
-        this.setVelocityX(2);
 
-        this.sword.play('sword_swing', true);
-        // on finish animation
-        this.sword.on('animationcomplete', () => {
-          this.isAttacking = false;
-          this.setSwordPosition();
-        });
+      this.setVelocityY(-50);
+
+      if (this.facing === 'right') {
+        this.setVelocityX(2);
+        this.sword.setAngle(90);
+        this.sword.setFlipX(false);
+        this.sword.setPosition(this.x + 8, this.y + 8);
       } else {
+        this.setVelocityX(-2);
         this.sword.setAngle(-90);
+        this.sword.setFlipX(true);
         this.sword.setPosition(this.x - 8, this.y + 8);
-        // add a small jump to the player
-        this.setVelocityY(-80);
-        this.sword.play('sword_swing', true);
-        // on finish animation
-        this.sword.on('animationcomplete', () => {
-          this.isAttacking = false;
-          this.setSwordPosition();
-        });
       }
 
-    }); 
+      this.sword.play('sword_swing', true);
+
+      // reset position
+      this.sword.on('animationcomplete', () => {
+        this.isAttacking = false;
+        this.setSwordPosition();
+      });
+
+    });
 
     // Toca animação da espada
     // this.sword.play('sword_swing', true);
