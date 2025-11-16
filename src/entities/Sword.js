@@ -12,18 +12,24 @@ export default class Sword extends Phaser.GameObjects.Sprite {
     this.idleOffsetY = 8;
     this.attackOffsetX = -5;
     this.attackOffsetY = -2;
+    this.hitboxOffsetX = 12;
+    this.hitboxOffsetY = 2;
 
     this.isAttacking = false;
     this.swordState = 'idle'; // idle, up, attacking
 
     this.createAnimations(scene);
 
+    this.createHitbox(scene);
+
     this.play('sword_idle');
   }
 
   updatePosition(player) {
-    
+
     this.setScale(0.8);
+
+    this.updateHitbox(player);
 
     if (this.swordState == 'up') {
       this.setUpPosition(player);
@@ -35,8 +41,14 @@ export default class Sword extends Phaser.GameObjects.Sprite {
       return;
     }
 
-    if (this.swordState == 'idle') {
-      this.setIdlePosition(player);
+    this.setIdlePosition(player);
+  }
+
+  updateHitbox(player) {
+    if (player.facing === 'right') {
+      this.hitbox.setPosition(player.x + this.hitboxOffsetX, player.y + this.hitboxOffsetY);
+    } else {
+      this.hitbox.setPosition(player.x - this.hitboxOffsetX, player.y + this.hitboxOffsetY);
     }
   }
 
@@ -83,6 +95,7 @@ export default class Sword extends Phaser.GameObjects.Sprite {
     // fazer ataque
     this.scene.time.delayedCall(100, () => {
       this.swordState = 'attacking';
+      this.enableHitbox();
       this.setAttackPosition(player);
 
       this.play('sword_swing', true);
@@ -90,6 +103,7 @@ export default class Sword extends Phaser.GameObjects.Sprite {
       // reset position
       const completeHandler = () => {
         this.isAttacking = false;
+        this.disableHitbox();
         this.swordState = 'idle';
         this.play('sword_idle', true);
         this.off('animationcomplete', completeHandler);
@@ -100,6 +114,24 @@ export default class Sword extends Phaser.GameObjects.Sprite {
 
       this.on('animationcomplete', completeHandler);
     });
+  }
+
+  createHitbox(scene) {
+    this.hitbox = scene.add.rectangle(this.x, this.y, 10, 20, 0xff0000, 0.3);
+
+    scene.physics.add.existing(this.hitbox);
+
+    // this.hitbox.body.setAllowGravity(false);
+    // this.hitbox.body.setImmovable(true);
+    this.hitbox.body.enable = false;
+  }
+
+  enableHitbox() {
+    this.hitbox.body.enable = true;
+  }
+
+  disableHitbox() {
+    this.hitbox.body.enable = false;
   }
 
   createAnimations(scene) {

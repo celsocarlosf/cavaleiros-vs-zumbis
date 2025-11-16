@@ -1,4 +1,5 @@
 import Player from '../entities/PlayerV2.js';
+import Enemy from '../entities/EnemyV2.js';
 
 export default class LevelBase extends Phaser.Scene {
   constructor(key) {
@@ -11,6 +12,7 @@ export default class LevelBase extends Phaser.Scene {
     this.createControlls();
     this.createMap();
     this.createPlayer();
+    this.createEnemies();
     this.setupCollisions();
   }
 
@@ -36,6 +38,9 @@ export default class LevelBase extends Phaser.Scene {
     }
 
     this.player.update();
+    this.enemies.children.iterate((enemy) => {
+      enemy.update();
+    });
   }
 
 
@@ -50,11 +55,27 @@ export default class LevelBase extends Phaser.Scene {
   }
 
   createPlayer() {
-    this.player = new Player(this, 100, 400);
+    this.player = new Player(this, 100, 100);
+  }
+
+  createEnemies() {
+
+    this.enemies = this.physics.add.group({
+      classType: Enemy,
+      runChildUpdate: true,
+    });
+
+    const enemy1 = this.enemies.get(400, 100);
+    enemy1.setActive(true).setVisible(true);
+
   }
 
   setupCollisions() {
-    // Setup de colisões genéricas (ex: chão, inimigos)
+    this.physics.add.overlap(this.player, this.enemies, this.onPlayerHit);
+  }
+
+  onPlayerHit(player, enemy) {
+    console.log("Player hit by enemy!");
   }
 
 }

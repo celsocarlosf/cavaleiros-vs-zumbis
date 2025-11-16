@@ -19,6 +19,11 @@ export default class BootScene extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 32
     });
+
+    this.load.spritesheet('enemy_slime', '/assets/knight/sprites/slime_purple.png', {
+      frameWidth: 24,
+      frameHeight: 24
+    });
   }
 
   create() {
