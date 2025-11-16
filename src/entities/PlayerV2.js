@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import Sword from "./Sword.js";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -7,139 +8,102 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.setup(scene);
 
     this.createAnimations(scene);
-
   }
 
-  // --------------------------------------------------------------------------
-  // SETUP
-  // --------------------------------------------------------------------------
   setup(scene) {
     scene.add.existing(this);
-
     scene.physics.add.existing(this);
-
     this.setCollideWorldBounds(true);
 
+    // speed
     this.speed = 100;
-    this.facing = 'right';
-    this.isAttacking = false;
+    this.maxSpeed = 150;
+    this.xAcceleration = 500;
+
+    // jump
+    this.jumpVelocity = -300;
+    this.shortHopMultiplier = 0.5;
+
+    // physics
+    this.groundDrag = 1000;
+    this.airDrag = 80;
     this.gravityY = 800;
     this.setGravityY(this.gravityY);
+
     // Espada separada
-    this.sword = scene.add.sprite(this.x, this.y, 'sword');
-    this.sword.setOrigin(0.5, 0.5);
+    this.sword = new Sword(scene, this.x, this.y);
+
+    // states
+    this.isAttacking = false;
+    this.isJumping = false;
+    this.facing = 'right';
   }
 
   update() {
-    this.setSwordPosition();
+    this.sword.updatePosition(this);
+
+    // set max speed
+    if (this.body.velocity.x > this.maxSpeed) {
+      this.setVelocityX(this.maxSpeed);
+    } else if (this.body.velocity.x < -this.maxSpeed) {
+      this.setVelocityX(-this.maxSpeed);
+    }
+
+    if (this.body.onFloor()) {
+      this.setDragX(this.groundDrag);
+    } else {
+      this.setDragX(this.airDrag);
+    }
   }
 
   stop() {
-    if (this.isAttacking) return;
 
-    this.setVelocityX(0);
+    this.setAccelerationX(0);
     this.play('player_idle', true);
   }
 
   walkLeft() {
-    if (this.isAttacking) return; // não troca animação durante ataque
 
-    this.setVelocityX(-this.speed);
+    this.setAccelerationX(-this.xAcceleration);
     this.setFlipX(true);
     this.facing = 'left';
     this.play('player_run', true);
   }
 
   walkRight() {
-    if (this.isAttacking) return;
 
-    this.setVelocityX(this.speed);
+    this.setAccelerationX(this.xAcceleration);
     this.setFlipX(false);
     this.facing = 'right';
     this.play('player_run', true);
   }
 
   jump() {
-    // Implementar mais tarde
+    if (this.body.blocked.down || this.body.onFloor()) {
+      this.setVelocityY(this.jumpVelocity);
+      this.isJumping = true;
+    }
   }
 
-  // --------------------------------------------------------------------------
-  // ATAQUE
-  // --------------------------------------------------------------------------
+  cancelJump() {
+    if (this.isJumping && this.body.velocity.y < 0) {
+      this.setVelocityY(this.body.velocity.y * this.shortHopMultiplier);
+    }
+
+    this.isJumping = false;
+  }
+
   attack() {
     if (this.isAttacking) return;
 
     this.isAttacking = true;
 
-    this.setVelocityX(0);
-    // Ajusta ângulo inicial do ataque
-    const xOffset = -5;
-    const yOffset = -2;
+    this.sword.attack(this, () => {
 
-    if (this.facing === 'right') {
-      this.sword.setPosition(this.x + xOffset, this.y + yOffset);
-      this.sword.setAngle(0);
-    } else {
-      this.sword.setPosition(this.x - xOffset, this.y + yOffset);
-      this.sword.setAngle(360);
-    }
-
-    // fazer ataque
-    this.scene.time.delayedCall(100, () => {
-
-      this.setVelocityY(-50);
-
-      if (this.facing === 'right') {
-        this.setVelocityX(2);
-        this.sword.setAngle(90);
-        this.sword.setFlipX(false);
-        this.sword.setPosition(this.x + 8, this.y + 8);
-      } else {
-        this.setVelocityX(-2);
-        this.sword.setAngle(-90);
-        this.sword.setFlipX(true);
-        this.sword.setPosition(this.x - 8, this.y + 8);
-      }
-
-      this.sword.play('sword_swing', true);
-
-      // reset position
-      this.sword.on('animationcomplete', () => {
-        this.isAttacking = false;
-        this.setSwordPosition();
-      });
-
+      this.isAttacking = false;
     });
-
-    // Toca animação da espada
-    // this.sword.play('sword_swing', true);
-
-    // Quando terminar, volta ao idle da espada e libera ataque
-    // this.sword.once('animationcomplete', () => {
-    //   this.isAttacking = false;
-    //   this.sword.setAngle(this.facing === 'right' ? 90 : -90);
-    //   this.sword.play('sword_idle');
-    // });
   }
 
-  setSwordPosition() {
-    if (this.isAttacking) return;
-
-    this.sword.play('sword_idle');
-
-    const xOffset = 8;
-    const yOffset = 8;
-
-    this.sword.setScale(0.8);
-
-    if (this.facing === 'right') {
-      this.sword.setPosition(this.x + xOffset, this.y + yOffset);
-      this.sword.setAngle(90);
-    } else {
-      this.sword.setPosition(this.x - xOffset, this.y + yOffset);
-      this.sword.setAngle(-90);
-    }
-  }
 
   createAnimations(scene) {
     // Player idle
@@ -168,22 +132,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       repeat: 0
     });
 
-    // Sword idle
-    scene.anims.create({
-      key: 'sword_idle',
-      frames: scene.anims.generateFrameNumbers('sword', { start: 0, end: 0 }),
-      frameRate: 5,
-      repeat: -1
-    });
 
-    // Sword swing (ataque)
-    scene.anims.create({
-      key: 'sword_swing',
-      frames: scene.anims.generateFrameNumbers('sword', { start: 4, end: 7 }),
-      frameRate: 15,
-      repeat: 0
-    });
-
-    this.sword.play('sword_idle');
   }
 }

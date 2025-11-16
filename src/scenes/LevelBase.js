@@ -23,8 +23,12 @@ export default class LevelBase extends Phaser.Scene {
       this.player.stop();
     }
 
-    if (this.cursors.up.isDown) {
+    if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
       this.player.jump();
+    }
+
+    if (Phaser.Input.Keyboard.JustUp(this.cursors.up)) {
+      this.player.cancelJump();
     }
 
     if (this.attackKey.isDown) {
@@ -46,7 +50,7 @@ export default class LevelBase extends Phaser.Scene {
   }
 
   createPlayer() {
-    this.player = new Player(this, 100, 100);
+    this.player = new Player(this, 100, 400);
   }
 
   setupCollisions() {
